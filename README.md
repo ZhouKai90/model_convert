@@ -1,4 +1,4 @@
-# model_transform: Convert model between Mxnet and Caffe
+# model_convert: Convert model between Mxnet and Caffe
 
 You are welcome to file issues either for bugs in the source code, feature requests!
 
