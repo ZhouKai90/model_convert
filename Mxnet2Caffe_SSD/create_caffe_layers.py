@@ -89,7 +89,7 @@ def get_caffe_layer(node, net, input_dims):
         if pooling_type == 'max':
             pooling = params.Pooling.MAX
         elif pooling_type == 'avg':
-            pooling = params.Pooling.AVG
+            pooling = params.Pooling.AVE
         pooling_param = {'pool': pooling, 'pad': padding[0],
                          'kernel_size': kernel_size[0], 'stride': stride[0]}
         return layers.Pooling(net[node['inputs'][0]],
@@ -107,6 +107,15 @@ def get_caffe_layer(node, net, input_dims):
                       'channel_shared': channel_shared}
         return layers.Normalize(net[node['inputs'][0]],
                                 norm_param=norm_param)
+
+    if node['type'] == 'BatchNorm':
+        bn_param = {
+                    'moving_average_fraction': 0.90,
+                    'use_global_stats': True,
+                    'eps': 1e-5
+        }
+        return layers.BatchNorm(net[node['inputs'][0]],
+                                in_place=True, **bn_param)
 
     # Note - this layer has been implemented
     # only in WeiLiu's ssd branch of caffe not in caffe master
@@ -147,10 +156,10 @@ def get_caffe_layer(node, net, input_dims):
         steps = make_list(node["attrs"]["steps"])
         param = {'clip': node["attrs"]["clip"] == "true",
                  'flip': False,
-                 'min_size': min_size,
-                 'max_size': max_size,
+                 'min_size': int(round(min_size)),
+                 'max_size': int(round(max_size)),
                  'aspect_ratio': aspect_ratio,
-                 'variance': [0.1, 0.1, 0.2, 0.2],
+                 'variance': [.1, .1, .2, .2],
                  'step': int(round(steps[0] * input_dims[0])),
                  }
         return layers.PriorBox(*priorbox_inputs, prior_box_param=param)
